@@ -7,6 +7,17 @@ import genomepy
 
 from signet import DATA
 
+
+def complement(base):
+    if base == "A":
+        return "T"
+    if base == "C":
+        return "G"
+    if base == "G":
+        return "C"
+    if base == "T":
+        return "A"
+
 # https://www.biostars.org/p/334253/
 def VCF_to_counts(vcf_path, reference_genome):
 
@@ -43,6 +54,7 @@ def VCF_to_counts(vcf_path, reference_genome):
         flank = 1
         # iterate over each variant
         list_of_mutations = []
+        record_count = 0
         for record in vcf:
             # extract sequence
             #
@@ -72,7 +84,8 @@ def VCF_to_counts(vcf_path, reference_genome):
         # Filter and sort based on the mutation categories. 
         muts_sorted = []
         for mutation_type in mutation_order['Type']:
-            muts_sorted.append(counts[mutation_type])
+            mutation_type_rev = complement(mutation_type[6])+'['+complement(mutation_type[2])+'>'+complement(mutation_type[4])+']'+complement(mutation_type[0])
+            muts_sorted.append(counts[mutation_type]+counts[mutation_type_rev])
         file_dict = {mutation_order.loc[i, 'Type']: [muts_sorted[i]] for i in range(len(mutation_order))}
         file_df = pd.DataFrame(file_dict, index = [file_name])
         final_df = pd.concat((final_df, file_df))
@@ -125,7 +138,8 @@ def bed_to_counts(bed_path, reference_genome_path):
         # Filter and sort based on the mutation categories. 
         muts_sorted = []
         for mutation_type in mutation_order['Type']:
-            muts_sorted.append(counts[mutation_type])
+            mutation_type_rev = complement(mutation_type[6])+'['+complement(mutation_type[2])+'>'+complement(mutation_type[4])+']'+complement(mutation_type[0])
+            muts_sorted.append(counts[mutation_type]+counts[mutation_type_rev])
         sample_dict = {mutation_order.loc[i, 'Type']: [muts_sorted[i]] for i in range(len(mutation_order))}
         sample_df = pd.DataFrame(sample_dict, index = [sample])
         final_df = pd.concat((final_df, sample_df))
