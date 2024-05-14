@@ -3,7 +3,12 @@ from torch.utils.data import Dataset
 
 
 class DataPartitions(Dataset):
-    def __init__(self, inputs=None, labels=None, prev_guess=None, num_mut=None, extract_nummut=True):
+    def __init__(self,
+                 inputs=None,
+                 labels=None,
+                 prev_guess=None,
+                 num_mut=None,
+                 extract_nummut=True):
         """Encapsulates input, label and previous step guess of a dataset.
         
         Args:

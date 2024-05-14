@@ -1,5 +1,8 @@
 import os
 
+import numpy as np
+from matplotlib import pyplot as plt
+import torch
 from torch.utils.tensorboard import SummaryWriter
 import wandb
 
@@ -22,6 +25,15 @@ class FinetunerLogger:
             # "JS": get_jensen_shannon,
             # "W": get_wasserstein_distance,
         }
+        
+    def log_bias(self, label, pred, split):
+        plt.close("all")
+        bias_figure = plt.figure()
+        bias = torch.mean(pred - label, 0).detach().cpu().numpy()
+        plt.ylim(-0.025, 0.025)
+        plt.bar(list(range(bias.shape[-1])), bias, )
+        wandb.log({f"{split}_bias_vector": wandb.Image(bias_figure)})
+        wandb.log({f"{split}_bias": np.sum(np.abs(bias))})
 
     def log(self,
             train_loss,
@@ -36,6 +48,9 @@ class FinetunerLogger:
 
         wandb.log({"train_loss": train_loss})
         wandb.log({"val_loss": val_loss})
+        
+        self.log_bias(label=train_label, pred=train_prediction, split="train")
+        self.log_bias(label=val_label, pred=val_prediction, split="val")
 
         for metric_name in self.metrics.keys():
             metric = self.metrics[metric_name]

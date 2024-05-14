@@ -162,7 +162,7 @@ class FineTunerLargeNumMut(FineTuner):
                 mutation_dist,
                 baseline_guess,
                 num_mut,
-                cutoff):
+                cutoff=0.01):
         # Input head
         mutation_dist = self.activation(self.layer1_2(mutation_dist))
         # mutation_dist = self.activation(self.layer2_2(mutation_dist))

@@ -70,37 +70,126 @@ def generate_realistic_nummut_data(
     return data
 
 
-def read_data_final_finetuner(device, data_id, data_folder=DATA, network_type="low"):
-    '''
-    Read all real data, oversample and generate samples with different numbers of mutations
-    to train the final finetuner.
-    '''
-    data_folder = data_folder + data_id
-    real_data = csv_to_pandas(data_folder + "/sigprofiler_not_norm_PCAWG.csv",
-                                    device=device, header=0, index_col=0,
-                                    type_df=data_folder + "/PCAWG_sigProfiler_SBS_signatures_in_samples_v3.csv")
+# def read_data_final_finetuner(device, data_id, data_folder=DATA, network_type="low"):
+#     '''
+#     Read all real data, oversample and generate samples with different numbers of mutations
+#     to train the final finetuner.
+#     '''
+#     data_folder = data_folder + data_id
+#     real_data = csv_to_pandas(data_folder + "/sigprofiler_not_norm_PCAWG.csv",
+#                                     device=device, header=0, index_col=0,
+#                                     type_df=data_folder + "/PCAWG_sigProfiler_SBS_signatures_in_samples_v3.csv")
+#     ctypes = torch.tensor(real_data.values[:,-1], dtype=torch.float)
+#     real_data = torch.tensor(real_data.values[:,:-1], dtype=torch.float)
+#     real_data = torch.cat([real_data, torch.zeros(real_data.size(0), 7).to(real_data)], dim=1)
+#     oversampler = CancerTypeOverSampler(real_data, ctypes)
+#     oversampled_weights = oversampler.get_N_oversampled_set(N_samples=1)
+
+#     # Create inputs associated to the labels:
+#     signatures = read_signatures(
+#         DATA + "data.xlsx",
+#         mutation_type_order=DATA + "mutation_type_order.xlsx")
+#     data_generator = DataGenerator(signatures=signatures,
+#                                    seed=None,
+#                                    shuffle=True)
+
+#     train_input, train_label = data_generator.make_input(
+#         labels=oversampled_weights,
+#         split="train",
+#         large_low=network_type,
+#     )
+    
+#     # Run Baseline
+#     sf = Baseline(signatures)
+#     train_baseline = sf.get_weights_batch(train_input, n_workers=2)
+    
+#     train_data = DataPartitions(inputs=train_input.float().to(device),
+#                                 prev_guess=train_baseline.float().to(device),
+#                                 labels=train_label.float().to(device))
+#     val_data = train_data
+#     return train_data, val_data
+
+
+def _shuffle(data):
+    indexes = torch.randperm(data.shape[0])
+    return data[indexes, ...]
+
+def _convert_to_input(data_weights, network_type, split, device):
+    signatures = read_signatures(
+        file=DATA+"data.xlsx",
+        mutation_type_order=DATA+"mutation_type_order.xlsx")
+    
+    data_generator = DataGenerator(
+        signatures=signatures,
+        seed=0,
+        shuffle=True
+    )
+    
+    inputs, labels = data_generator.make_input(
+        labels=data_weights,
+        split=split,
+        large_low=network_type,
+    )
+    
+    # Compute baselines
+    sf = Baseline(signatures)
+    baselines = sf.get_weights_batch(inputs, n_workers=6)
+
+    data = DataPartitions(
+        inputs=inputs,
+        prev_guess=baselines,
+        labels=labels,
+    )
+    data.to(device)
+    return data
+
+def read_finetuner_data(data_id, network_type, device):
+    # Read real weight combinations (labels)
+    real_data = csv_to_pandas(
+        file=DATA + data_id + "/sigprofiler_not_norm_PCAWG.csv",
+        device=device,
+        header=0,
+        index_col=0,
+        type_df=DATA + data_id + "/PCAWG_sigProfiler_SBS_signatures_in_samples_v3.csv"
+    )
+    
+    # Extract cancer types, remove cancertype column from input, add missing signatures
     ctypes = torch.tensor(real_data.values[:,-1], dtype=torch.float)
     real_data = torch.tensor(real_data.values[:,:-1], dtype=torch.float)
     real_data = torch.cat([real_data, torch.zeros(real_data.size(0), 7).to(real_data)], dim=1)
-    oversampler = CancerTypeOverSampler(real_data, ctypes)
+    
+    # Oversample according to cancer type (if N_samples=0 nothing is done)
+    oversampler = CancerTypeOverSampler(
+        data=real_data,
+        cancer_types=ctypes
+    )
     oversampled_weights = oversampler.get_N_oversampled_set(N_samples=1)
-
-    # Create inputs associated to the labels:
-    signatures = read_signatures(
-        DATA + "data.xlsx",
-        mutation_type_order=DATA + "mutation_type_order.xlsx")
-    data_generator = DataGenerator(signatures=signatures,
-                                   seed=None,
-                                   shuffle=True)
-
-    train_input, train_label = data_generator.make_input(oversampled_weights, "train", network_type, normalize=True)
+                                                            
+    # Shuffle data and split into train and validation
+    oversampled_weights =_shuffle(oversampled_weights)
+    n = oversampled_weights.shape[0]
+    train_weights = oversampled_weights[:int(0.8*n)]
+    val_weights = oversampled_weights[int(0.8*n):]
     
-    # Run Baseline
-    sf = Baseline(signatures)
-    train_baseline = sf.get_weights_batch(train_input, n_workers=2)
-    
-    train_data = DataPartitions(inputs=train_input.float().to(device),
-                                prev_guess=train_baseline.float().to(device),
-                                labels=train_label.float().to(device))
-    val_data = train_data
+    train_data = _convert_to_input(
+        data_weights=train_weights,
+        network_type=network_type,
+        split="train",
+        device=device,
+    )
+    val_data = _convert_to_input(
+        data_weights=val_weights,
+        network_type=network_type,
+        split="val",
+        device=device,
+    )
     return train_data, val_data
+    
+if __name__=="__main__":
+
+    train_data, val_data = read_finetuner_data(
+            device="cpu",
+            data_id="real_data",
+            network_type="large"
+        )
+    

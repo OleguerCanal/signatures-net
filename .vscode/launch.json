@@ -12,7 +12,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${workspaceFolder}/src",
+            "cwd": "${workspaceFolder}/signet/",
             "console": "integratedTerminal"
         }
 
@@ -31,7 +31,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${workspaceFolder}/src/generate_data",
+            "cwd": "${workspaceFolder}/signet//generate_data",
             "args": ["v3"],
             "console": "integratedTerminal"
         }
@@ -41,7 +41,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${workspaceFolder}/src/generate_errorfinder_data.py",
+            "cwd": "${workspaceFolder}/signet//generate_errorfinder_data.py",
             "args": ["v3"],
             "console": "integratedTerminal"
         }
@@ -51,7 +51,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "cwd": "${workspaceFolder}/src/generate_data_using_generator.py",
+            "cwd": "${workspaceFolder}/signet//generate_data_using_generator.py",
             "args": ["v3"],
             "console": "integratedTerminal"
         }
@@ -70,7 +70,7 @@
             "type": "python",
             "request": "launch",
             "program": "train_finetuner.py",
-            "cwd": "${workspaceFolder}/src",
+            "cwd": "${workspaceFolder}/signet/",
             "console": "integratedTerminal"
         }
 
@@ -79,7 +79,7 @@
             "type": "python",
             "request": "launch",
             "program": "train_errorfinder.py",
-            "cwd": "${workspaceFolder}/src",
+            "cwd": "${workspaceFolder}/signet/",
             "console": "integratedTerminal"
         }
 
@@ -96,7 +96,7 @@
             "name": "Python: Test Yapsa-Inspired-Baseline",
             "type": "python",
             "request": "launch",
-            "program": "src/models/yapsa_inspired_baseline.py",
+            "program": "signet//models/yapsa_inspired_baseline.py",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         }
@@ -106,7 +106,7 @@
             "type": "python",
             "request": "launch",
             "program": "classification_metrics_test.py",
-            "cwd": "${workspaceFolder}/src",
+            "cwd": "${workspaceFolder}/signet/",
             "console": "integratedTerminal"
         }
 
@@ -115,7 +115,7 @@
             "type": "python",
             "request": "launch",
             "program": "optimize_finetuner.py",
-            "cwd": "${workspaceFolder}/src/hyperparam_optimizers",
+            "cwd": "${workspaceFolder}/signet//hyperparam_optimizers",
             "console": "integratedTerminal"
         }
 
@@ -124,7 +124,7 @@
             "type": "python",
             "request": "launch",
             "program": "optimize_classifier.py",
-            "cwd": "${workspaceFolder}/src/hyperparam_optimizers",
+            "cwd": "${workspaceFolder}/signet//hyperparam_optimizers",
             "console": "integratedTerminal"
         }
 
@@ -133,7 +133,7 @@
             "type": "python",
             "request": "launch",
             "program": "signet_tester.py",
-            "cwd": "${workspaceFolder}/src/tests/test_by_module/",
+            "cwd": "${workspaceFolder}/signet//tests/test_by_module/",
             "console": "integratedTerminal"
         }
 
@@ -142,7 +142,7 @@
             "type": "python",
             "request": "launch",
             "program": "search_test.py",
-            "cwd": "${workspaceFolder}/src/hyperparam_optimizers",
+            "cwd": "${workspaceFolder}/signet//hyperparam_optimizers",
             "console": "integratedTerminal"
         }
 
@@ -151,7 +151,7 @@
             "type": "python",
             "request": "launch",
             "program": "signet.py",
-            "cwd": "${workspaceFolder}/src/modules",
+            "cwd": "${workspaceFolder}/signet//modules",
             "console": "integratedTerminal"
         }
 
@@ -160,7 +160,7 @@
             "type": "python",
             "request": "launch",
             "program": "signet_tester.py",
-            "cwd": "${workspaceFolder}/src/tests/test_by_module/",
+            "cwd": "${workspaceFolder}/signet//tests/test_by_module/",
             "console": "integratedTerminal"
         }
 
@@ -169,7 +169,7 @@
             "type": "python",
             "request": "launch",
             "program": "finetuner_crossvalidation.py",
-            "cwd": "${workspaceFolder}/src/trainers/",
+            "cwd": "${workspaceFolder}/signet//trainers/",
             "args": ["low"],
             "console": "integratedTerminal"
         }

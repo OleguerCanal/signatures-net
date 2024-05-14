@@ -49,7 +49,7 @@ class DataGenerator:
                     [3]*num_samples + [4]*(num_samples + size%n_ranges)
 
             elif large_or_low == 'low':
-                range_muts = [15, 50, 100, 250, 500, 1000, 5000, 1e4, 1e5]
+                range_muts = [25, 50, 100, 250, 500, 1000, 5000, 1e4]
                 n_ranges = len(range_muts) - 1
                 num_samples = int(size/n_ranges)
                 ind_range_muts = [0]*num_samples + [1]*num_samples + [2]*num_samples + \
@@ -57,11 +57,12 @@ class DataGenerator:
                     [7]*(num_samples + size%n_ranges)
             
             elif large_or_low == 'large':
-                range_muts = [1e3, 5e3, 1e4, 5e4, 1e5, 5e5]
+                range_muts = [1000, 1500, 2500, 5e3, 1e4, 5e4, 1e5]
                 n_ranges = len(range_muts) - 1
                 num_samples = int(size/n_ranges)
                 ind_range_muts = [0]*num_samples + [1]*num_samples + \
-                    [2]*num_samples + [3]*num_samples + [-1]*(num_samples + size%8)
+                    [2]*num_samples + [3]*num_samples + [4]*num_samples + \
+                        [5]*num_samples + [6]*(num_samples + size%n_ranges)
                 # -1 means real distribution
 
             nummuts = [np.random.randint(range_muts[ind_range_muts[i]], range_muts[ind_range_muts[i] + 1])\
@@ -79,7 +80,7 @@ class DataGenerator:
 
     def _sample_from_sig(self, signature, num_mut):
         sample = signature
-        if num_mut > 0 and num_mut < 1e5:  # only do sampling for num_mut < 1e5
+        if num_mut > 0 and num_mut < 1e6:  # only do sampling for num_mut < 1e6
             c = torch.distributions.categorical.Categorical(probs=signature)
             sample_shape = torch.Size([num_mut, ])
             samples = c.sample(sample_shape=sample_shape).type(torch.float32)
@@ -92,7 +93,7 @@ class DataGenerator:
         return sample
 
 
-    def make_input(self, labels, split, large_low, augmentation=1, nummuts=None):
+    def make_input_bug(self, labels, split, large_low, augmentation=1, nummuts=None):
         """Create a labelled dataset of mutation vectors
            from a tensor of labels.
            Returns:
@@ -110,8 +111,11 @@ class DataGenerator:
         input_batch = torch.empty((labels.shape[0], 96))
         labels_batch = torch.empty((labels.shape[0], self.total_signatures + 1))
 
+        print(len(nummuts))
+        print(len(labels))
+
         logging.info("Sampling from labels...")
-        for i, num_mut in tqdm(enumerate(nummuts)):
+        for i, num_mut in tqdm(enumerate(nummuts[:len(labels)])):
             # Compute resulting signature
             signature = torch.einsum("ij,j->i", (self.signatures, labels[i]))
 
@@ -126,6 +130,46 @@ class DataGenerator:
             labels_batch[i, :] = torch.cat([labels[i, :], torch.tensor([float(num_mut)])])
         return input_batch, labels_batch
 
+    def make_input(self, labels, split, large_low, seed = 0):
+        """Create a labelled dataset of mutation vectors
+        from a tensor of labels.
+        """
+        self._set_all_seeds(seed)
+        if split == "train":
+            if large_low == 'low':
+                range_muts = [25, 50, 100, 250, 500, 1000, 5000, 1e4]
+            elif large_low == 'large':
+                range_muts = [1000, 1500, 2500, 5e3, 1e4, 5e4, 1e5]
+        elif split == "val":
+            if large_low == 'low':
+                range_muts = [25, 50, 100, 250, 500, 1000, 5000, 1e4]
+            elif large_low == 'large':
+                range_muts = [1000, 1500, 2500, 5e3, 1e4, 5e4, 1e5]
+        elif split == "test":
+            range_muts = [25, 50, 100, 250, 500, 1e3, 5e3, 1e4, 5e4, 1e5]
+
+        batch_size = (len(range_muts)-1)*labels.shape[0]
+        input_batch = torch.empty((batch_size, 96))
+        labels_batch = torch.empty((batch_size, self.total_signatures + 1))
+
+        for i in tqdm(range(len(range_muts)-1)):
+            for j in range(labels.shape[0]):
+                # Compute resulting signature
+                signature = torch.einsum("ij,j->i", (self.signatures, labels[j]))
+
+                if split == "test":
+                    num_mut = range_muts[i]
+                else:
+                    num_mut = np.random.randint(range_muts[i], range_muts[i+1])
+
+                sample = self._sample_from_sig(signature=signature,
+                                            num_mut=int(num_mut))
+                # Store
+                input_batch[i*labels.shape[0]+j, :] = sample
+                labels_batch[i*labels.shape[0]+j, :] = torch.cat(
+                    [labels[j, :], torch.tensor([float(num_mut)])])
+                
+        return input_batch, labels_batch
 
     def make_random_set(self,
                         split,
