@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
-setup(name='signet',
-      version='0.0.0',
+setup(name='signaturesnet',
+      version='0.0.1',
       description="Package to manipulate mutational processes.",
-      url='https://github.com/OleguerCanal/signatures-net',
+      url='https://github.com/weghornlab/SigNet',
       packages=find_packages(),
       install_requires=[
             'torch==1.11',
@@ -15,7 +15,7 @@ setup(name='signet',
             'scikit_optimize==0.8.1',
             'tqdm==4.59.0',
             'pyparsing==2.4.7',
-            'gaussian_process==0.0.14',
+            # 'gaussian_process==0.0.14',
             'PyYAML==6.0',
             'scikit_learn',
             'openpyxl',

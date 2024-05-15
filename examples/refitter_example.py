@@ -4,8 +4,8 @@ import logging
 from argparse import ArgumentParser
 import pandas as pd
 
-from signet import DATA
-from signet.modules.signet_module import SigNet
+from signaturesnet import DATA
+from signaturesnet.modules.signet_module import SigNet
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO,
@@ -68,9 +68,9 @@ if __name__ == "__main__":
     # Read data
     mutations = pd.read_csv(args.input_data[0], header=0, index_col=0)
 
-    # Load & Run signet
-    signet = SigNet(opportunities_name_or_path=args.normalization[0])
-    results = signet(mutation_dataset=mutations, cutoff=args.cutoff[0], only_NNLS=args.only_nnls[0])
+    # Load & Run signaturesnet
+    signaturesnet = SigNet(opportunities_name_or_path=args.normalization[0])
+    results = signaturesnet(mutation_dataset=mutations, cutoff=args.cutoff[0], only_NNLS=args.only_nnls[0])
 
     # Extract results
     w, u, l, c, _ = results.get_output()

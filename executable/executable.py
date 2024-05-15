@@ -6,12 +6,12 @@ from argparse import ArgumentParser
 import pandas as pd
 import torch
 
-from signet import DATA, TRAINED_MODELS
-from signet.modules.signet_module import SigNet
-from signet.models import Generator
-from signet.models import Classifier
-from signet.utilities.io import read_model, tensor_to_csv
-from signet.utilities.normalize_data import normalize_data
+from signaturesnet import DATA, TRAINED_MODELS
+from signaturesnet.modules.signet_module import SigNet
+from signaturesnet.models import Generator
+from signaturesnet.models import Classifier
+from signaturesnet.utilities.io import read_model, tensor_to_csv
+from signaturesnet.utilities.normalize_data import normalize_data
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO,
@@ -57,9 +57,9 @@ def run_refitter(args):
     # Read data
     mutations = pd.read_csv(args.input_data[0], header=0, index_col=0)
 
-    # Load & Run signet
-    signet = SigNet(opportunities_name_or_path=args.normalization[0])
-    results = signet(mutation_dataset=mutations)
+    # Load & Run signaturesnet
+    signaturesnet = SigNet(opportunities_name_or_path=args.normalization[0])
+    results = signaturesnet(mutation_dataset=mutations)
 
     # Store results
     results.save(path=args.output_path[0])

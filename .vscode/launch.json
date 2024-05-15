@@ -61,7 +61,7 @@
             "type": "python",
             "request": "launch",
             "program": "train_generator.py",
-            "cwd": "${workspaceFolder}/signet/",
+            "cwd": "${workspaceFolder}/signaturesnet/",
             "console": "integratedTerminal"
         }
 
@@ -88,7 +88,7 @@
             "type": "python",
             "request": "launch",
             "program": "train_nummutnet.py",
-            "cwd": "${workspaceFolder}/signet/",
+            "cwd": "${workspaceFolder}/signaturesnet/",
             "console": "integratedTerminal"
         }
 
@@ -150,7 +150,7 @@
             "name": "Python: Signet",
             "type": "python",
             "request": "launch",
-            "program": "signet.py",
+            "program": "signaturesnet.py",
             "cwd": "${workspaceFolder}/src/modules",
             "console": "integratedTerminal"
         }

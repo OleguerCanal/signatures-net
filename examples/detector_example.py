@@ -4,8 +4,8 @@ import logging
 from argparse import ArgumentParser
 import torch
 
-from signet import DATA, TRAINED_MODELS
-from signet.utilities.io import csv_to_tensor, read_model
+from signaturesnet import DATA, TRAINED_MODELS
+from signaturesnet.utilities.io import csv_to_tensor, read_model
 
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',

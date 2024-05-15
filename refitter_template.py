@@ -4,9 +4,9 @@ import logging
 from argparse import ArgumentParser
 import pandas as pd
 
-from signet import DATA
-from signet.modules.signet_module import SigNet
-from signet.utilities.VCF_to_counts import VCF_to_counts, bed_to_counts
+from signaturesnet import DATA
+from signaturesnet.modules.signet_module import SigNet
+from signaturesnet.utilities.VCF_to_counts import VCF_to_counts, bed_to_counts
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO,
@@ -74,9 +74,9 @@ if __name__ == "__main__":
     elif args.input_format[0] == 'bed':
         mutations = bed_to_counts(args.input_data[0],args.reference_genome[0])
 
-    # Load & Run signet
-    signet = SigNet(opportunities_name_or_path=args.normalization[0])
-    results = signet(mutation_dataset=mutations, cutoff=args.cutoff[0], only_NNLS=args.only_nnls[0])
+    # Load & Run signaturesnet
+    signaturesnet = SigNet(opportunities_name_or_path=args.normalization[0])
+    results = signaturesnet(mutation_dataset=mutations, cutoff=args.cutoff[0], only_NNLS=args.only_nnls[0])
 
     # Extract results
     w, u, l, c, _ = results.get_output()

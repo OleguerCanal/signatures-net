@@ -1,7 +1,7 @@
 import os
 
-from signet import DATA, TRAINED_MODELS
-from signet.utilities.io import read_model, read_signatures
+from signaturesnet import DATA, TRAINED_MODELS
+from signaturesnet.utilities.io import read_model, read_signatures
 
 if __name__=="__main__":
     signatures = read_signatures(os.path.join(DATA, "data.xlsx"))

@@ -29,7 +29,7 @@ Recommended if you want to integrate SigNet as part of your python workflow, or 
 You can install the python package running:
 
 ```BASH
-pip install signet
+pip install signaturesnet
 ```
 **NOTE:** *The package hasn't yet been published to [pypi](https://pypi.org/). Please refer to [Source Code](#source-code)* to use it for now.*
 
@@ -37,14 +37,14 @@ Once installed, you can run Signet Refitter like so:
 
 ```python
 import pandas as pd
-import signet
+import signaturesnet
 
 # Read your mutational data
 mutations = pd.read_csv("your_input", header=0, index_col=0)
 
-# Load & Run signet
-signet = SigNet(opportunities_name_or_path="your_normalization_file")
-results = signet(mutation_dataset=mutations)
+# Load & Run signaturesnet
+signaturesnet = SigNet(opportunities_name_or_path="your_normalization_file")
+results = signaturesnet(mutation_dataset=mutations)
 
 # Extract results
 w, u, l, c, _ = results.get_output()
@@ -69,9 +69,9 @@ For a more usage examples: Check out the [examples folder](examples/):
 Recommended if only interested in running SigNet modules independently and **not** willing to retrain models or change the source code.<br>
 **NOTE**: _This option is only tested on Debian-based Linux distributions_. Steps:
 
-1. Download the [signet exectuable](TODOlink_to_executable)
+1. Download the [signaturesnet exectuable](TODOlink_to_executable)
 2. Change directory to wherever you downloaded it: `cd <wherever/you/downloaded/the/executable/>` 
-3. Make it executable by your user: `sudo chmod u+x signet`
+3. Make it executable by your user: `sudo chmod u+x signaturesnet`
 
 __Refitter:__
 
@@ -80,7 +80,7 @@ The following example shows how to use [SigNet Refitter](documentation/signet_re
 
 ```BASH
 cd <wherever/you/downloaded/the/executable/>
-./signet refitter  [--input_format {counts, bed, vcf}]
+./signaturesnet refitter  [--input_format {counts, bed, vcf}]
                    [--input_data INPUTFILE]
                    [--reference_genome REFGENOME]
                    [--normalization {None, exome, genome, PATH_TO_ABUNDANCES}] 
@@ -115,7 +115,7 @@ __Detector:__
 
 ```BASH
 cd <wherever/you/downloaded/the/executable/>
-./signet detector  [--input_data INPUTFILE]
+./signaturesnet detector  [--input_data INPUTFILE]
                    [--normalization {None, exome, genome, PATH_TO_ABUNDANCES}] 
                    [--output OUTPUT]
 ```
@@ -126,7 +126,7 @@ __Generator:__
 
 ```BASH
 cd <wherever/you/downloaded/the/executable/>
-./signet generator  [--n_datapoints INT]
+./signaturesnet generator  [--n_datapoints INT]
                     [--output OUTPUT]
 ```
 

@@ -9,7 +9,6 @@ tqdm==4.59.0
 pyparsing==2.4.7
 gaussian_process==0.0.14
 PyYAML==6.0
-scikit_learn
 openpyxl
 pysam
 genomepy

@@ -1,6 +1,6 @@
 # Source code structure
 
-- `signet/`: Contains all src scripts needed to run and train the SigNet models.
+- `signaturesnet/`: Contains all src scripts needed to run and train the SigNet models.
   - `configs/`: Contains the model architecture and training parameters of each neural network used in SigNet.
   - `data/`: Refer [here](data_folder.md).
   - `generate_data/`: Collection of scripts used to create the training sets for each module.
