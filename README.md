@@ -145,7 +145,7 @@ Recommended if you want to play around with the code, re-train custom models or 
 Clone the repo and install it as an editable pip package like so:
 
 ```BASH
-git clone git@github.com:OleguerCanal/SigNet.git
+git clone git@github.com:weghornlab/SigNet.git
 cd SigNet
 pip install -e .
 ```
