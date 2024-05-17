@@ -9,6 +9,9 @@ As of now, it contains 3 solutions:
 - **[SigNet Detector](documentation/signet_detector.md)**: Tool for mutational vector out-of-distribution detection.
 
 
+This is the official code implementation of the paper: [Mutational signature decomposition with deep neural networks reveals origins of clock-like processes and hypoxia dependencies](https://www.biorxiv.org/content/10.1101/2023.12.06.570467v1).
+By [Claudia Serrano](https://www.linkedin.com/in/claudia-serrano-colome-440aa9182/), [Oleguer Canal](https://github.com/OleguerCanal), et all.
+
 ## Readme contents
 
 You can use SigNet in 3 different ways depending on your workflow:
@@ -31,7 +34,6 @@ You can install the python package running:
 ```BASH
 pip install signaturesnet
 ```
-**NOTE:** *The package hasn't yet been published to [pypi](https://pypi.org/). Please refer to [Source Code](#source-code)* to use it for now.*
 
 Once installed, you can run Signet Refitter like so:
 
