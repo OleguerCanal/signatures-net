@@ -33,7 +33,7 @@ if __name__ == "__main__":
     print(num_mut)
 
     # Load model
-    signaturesnet = SigNet(classifier=TRAINED_MODELS + "/detector",
+    signet = SigNet(classifier=TRAINED_MODELS + "/detector",
                     finetuner_realistic_low=TRAINED_MODELS + "/finetuner_low",
                     finetuner_realistic_large=TRAINED_MODELS + "/finetuner_large",
                     errorfinder=TRAINED_MODELS + "/errorfinder",
@@ -42,7 +42,7 @@ if __name__ == "__main__":
                     mutation_type_order=DATA + "/mutation_type_order.xlsx")
     print("model read")
 
-    result = signaturesnet(input_df, numpy=False)
+    result = signet(input_df, numpy=False)
     print("forwarded")
 
     finetuner_guess, lower_bound, upper_bound, classification, normalized_input = result.get_output(format="numpy")

@@ -24,7 +24,7 @@ input_df.columns = signatures['Type']
 
 # Load model
 path = "../../trained_models/"
-signaturesnet = SigNet(classifier=path + "detector",
+signet = SigNet(classifier=path + "detector",
                 finetuner_realistic_low=path + "finetuner_low",
                 finetuner_realistic_large=path + "finetuner_large",
                 errorfinder=path + "errorfinder",
@@ -34,7 +34,7 @@ signaturesnet = SigNet(classifier=path + "detector",
 
 print("model read")
 
-result = signaturesnet(input_df, numpy=False)
+result = signet(input_df, numpy=False)
 print("forwarded")
 
 finetuner_guess, lower_bound, upper_bound, classification, normalized_input = result.get_output(format="tensor")
@@ -42,13 +42,13 @@ finetuner_guess, lower_bound, upper_bound, classification, normalized_input = re
 list_of_methods = ["decompTumor2Sig", "MutationalPatterns", "mutSignatures", "SignatureEstimationQP","YAPSA"]
 list_of_guesses, label = read_methods_guesses('cpu', "exp_all", list_of_methods, data_folder="../../../data/")
 list_of_methods += ['NNLS', 'Finetuner']
-list_of_guesses += [signaturesnet.baseline_guess, finetuner_guess[:,:-1]]
+list_of_guesses += [signet.baseline_guess, finetuner_guess[:,:-1]]
 
 labels = torch.tensor(labels.values, dtype=torch.float)
 final_plot_all_metrics_vs_mutations(list_of_methods=list_of_methods,
                                     list_of_guesses=list_of_guesses,
                                     label=labels,
-                                    signatures=signaturesnet.signatures,
+                                    signatures=signet.signatures,
                                     mutation_distributions=torch.tensor(inputs.values, dtype=torch.float),
                                     folder_path="../../../plots/paper/")
 

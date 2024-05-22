@@ -37,11 +37,11 @@ labels = csv_to_tensor("../../data/real_data/sigprofiler_normalized_PCAWG.csv",
 labels = labels/torch.sum(labels, axis=1).reshape(-1, 1)
 labels = torch.cat([labels, torch.zeros(labels.size(0), 7).to(labels)], dim=1)
 
-signaturesnet = SigNet(opportunities_name_or_path=opportunities, signatures_path="../../data/data.xlsx")
+signet = SigNet(opportunities_name_or_path=opportunities, signatures_path="../../data/data.xlsx")
 
 input_file = pd.read_csv(input_file_path, header=0, index_col=0)
 mutation_data = torch.tensor(input_file.values, dtype=torch.float)
-weight_guess, upper_bound, lower_bound, classification, normalized_input = signaturesnet(mutation_vec=mutation_data)
+weight_guess, upper_bound, lower_bound, classification, normalized_input = signet(mutation_vec=mutation_data)
 
 plot_reconstruction(normalized_input, labels, signatures, [100,101,200], '')
 

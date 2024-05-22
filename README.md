@@ -39,14 +39,14 @@ Once installed, you can run Signet Refitter like so:
 
 ```python
 import pandas as pd
-import signaturesnet
+from signaturesnet.modules.signet_module import SigNet
 
 # Read your mutational data
 mutations = pd.read_csv("your_input", header=0, index_col=0)
 
-# Load & Run signaturesnet
-signaturesnet = SigNet(opportunities_name_or_path="your_normalization_file")
-results = signaturesnet(mutation_dataset=mutations)
+# Load & Run signet
+signet = SigNet(opportunities_name_or_path="your_normalization_file")
+results = signet(mutation_dataset=mutations)
 
 # Extract results
 w, u, l, c, _ = results.get_output()

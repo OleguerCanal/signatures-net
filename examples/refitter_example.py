@@ -68,9 +68,9 @@ if __name__ == "__main__":
     # Read data
     mutations = pd.read_csv(args.input_data[0], header=0, index_col=0)
 
-    # Load & Run signaturesnet
-    signaturesnet = SigNet(opportunities_name_or_path=args.normalization[0])
-    results = signaturesnet(mutation_dataset=mutations, cutoff=args.cutoff[0], only_NNLS=args.only_nnls[0])
+    # Load & Run signet
+    signet = SigNet(opportunities_name_or_path=args.normalization[0])
+    results = signet(mutation_dataset=mutations, cutoff=args.cutoff[0], only_NNLS=args.only_nnls[0])
 
     # Extract results
     w, u, l, c, _ = results.get_output()

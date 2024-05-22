@@ -63,7 +63,7 @@ class SigNet:
             mutation_dataset = mutation_dataset[list(mutation_order['Type'])]
             sample_names = mutation_dataset.index
 
-            mutation_vec = torch.tensor(mutation_dataset.values.astype(np.float), dtype=torch.float, device='cpu')
+            mutation_vec = torch.tensor(mutation_dataset.values.astype(np.float32), dtype=torch.float, device='cpu')
             num_mutations = torch.sum(mutation_vec, dim=1)
 
             # Normalize input data
