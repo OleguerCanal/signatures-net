@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(name='signaturesnet',
-      version='0.1.0',
+      version='0.1.1',
       description="Package to manipulate mutational processes.",
       long_description=long_description,
       long_description_content_type="text/markdown",
@@ -32,6 +32,8 @@ setup(name='signaturesnet',
             'signaturesnet': [
                   'data/data.xlsx',
                   'data/mutation_type_order.xlsx',
+                  'data/real_data/*.txt'
+                  'data/real_data/*.csv'
                   'trained_models/**/*.json',
                   'trained_models/**/*.zip',
                   'configs/**/*.yaml'
