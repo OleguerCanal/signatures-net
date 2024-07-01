@@ -21,7 +21,7 @@ class Generator(nn.Module):
         for i in range(num_hidden_layers):
             in_features = int(input_size - (input_size-latent_dim)*i/num_hidden_layers)
             out_features = int(input_size - (input_size-latent_dim)*(i+1)/num_hidden_layers)
-            print("in_features:", in_features, "out_features:", out_features)
+            # print("in_features:", in_features, "out_features:", out_features)
             layer = nn.Linear(in_features, out_features)
             # layernorm = torch.nn.LayerNorm(in_features)
             # encoder_layers.append(layernorm)
