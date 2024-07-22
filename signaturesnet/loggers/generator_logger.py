@@ -92,19 +92,19 @@ class GeneratorLogger:
             wandb.log({"val_DQ99R" : val_real_metrics["quantiles"][-1],
                        "val_DQ99G" : val_fake_metrics["quantiles"][-1]})
             plt.switch_backend('agg')
-            if self.counter % 50*self.plot_freq == 0:
-                fig, _ = get_correlation_matrix(generated, self.signatures.columns[1:])
-                wandb.log({"correlation": wandb.Image(fig)})
-                plt.cla()
-                plt.clf()
-                plt.close()
+            # if self.counter % 50*self.plot_freq == 0:
+            #     fig, _ = get_correlation_matrix(generated, self.signatures.columns[1:])
+            #     wandb.log({"correlation": wandb.Image(fig)})
+            #     plt.cla()
+            #     plt.clf()
+            #     plt.close()
 
-                gen_presence = torch.mean(generated, dim=0)
-                presence_errors = (gen_presence - self.presence).detach().cpu().numpy()
-                # fig2 = plt.figure()
-                plt.bar(np.array(list(range(presence_errors.shape[0]))), presence_errors)
-                # plt.show()
-                wandb.log({"error_by_signature": plt})
+            #     gen_presence = torch.mean(generated, dim=0)
+            #     presence_errors = (gen_presence - self.presence).detach().cpu().numpy()
+            #     # fig2 = plt.figure()
+            #     plt.bar(np.array(list(range(presence_errors.shape[0]))), presence_errors)
+            #     # plt.show()
+            #     wandb.log({"error_by_signature": plt})
             
         self.counter += 1
         return train_DQ99R
