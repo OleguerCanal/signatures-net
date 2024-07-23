@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import wandb
 
-from signaturesnet import DATA
+from signaturesnet import DATA, TRAINED_MODELS
 from signaturesnet.utilities.metrics import get_jensen_shannon, get_kl_divergence
 from signaturesnet.utilities.io import save_model
 from signaturesnet.utilities.generator_data import GeneratorData
@@ -40,7 +40,7 @@ class VaeClassifierTrainer:
         self.device = device
         self.log_freq = log_freq
         self.lagrange_param = lagrange_param
-        self.model_path = model_path
+        self.model_path = os.path.join(TRAINED_MODELS, model_path)
         self.train_dataset = train_data
         self.val_dataset = val_data
 
