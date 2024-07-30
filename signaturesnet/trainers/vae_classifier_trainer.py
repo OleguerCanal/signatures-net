@@ -99,7 +99,7 @@ class VaeClassifierTrainer:
         train_DQ99R = None
         for iteration in range(self.iterations):
             for train_input, train_labels, _, _, _ in tqdm(dataloader):
-                train_input = train_input[(train_labels == 1).squeeze(-1)]
+                # train_input = train_input[(train_labels == 1).squeeze(-1)]
                 model.train()
                 optimizer.zero_grad()
                 train_pred, train_mean, train_std = model(train_input)
@@ -122,7 +122,8 @@ class VaeClassifierTrainer:
 
                 model.eval()
                 with torch.no_grad():
-                    val_inputs = self.val_dataset.inputs[(self.val_dataset.labels == 1).squeeze(-1)]
+                    # val_inputs = self.val_dataset.inputs[(self.val_dataset.labels == 1).squeeze(-1)]
+                    val_inputs = self.val_dataset.inputs
                     val_pred, val_mean, val_std = model(
                         val_inputs)
                     val_loss = self.__loss(input=val_inputs,
@@ -133,6 +134,7 @@ class VaeClassifierTrainer:
                     # max_found = max(max_found, -np.nanmean(l_vals))
 
                 if plot and step % self.log_freq == 0:
+                    print('Logger...')
                     current_train_DQ99R = self.logger.log(
                         train_loss=train_loss,
                         train_prediction=train_pred,
@@ -150,13 +152,14 @@ class VaeClassifierTrainer:
                     train_DQ99R = current_train_DQ99R if current_train_DQ99R is not None else train_DQ99R
 
                 if self.model_path is not None and step % 500 == 0:
+                    print('Saving model...')
                     save_model(model=model, directory=self.model_path)
                 step += 1
         if self.model_path is not None:
             save_model(model=model, directory=self.model_path)
         
         # Return last mse and KL obtained in validation
-        return train_DQ99R
+        return train_DQ99R, train_loss, val_loss
 
 def log_results(config, train_DQ99R, out_csv_path):
     model_results = pd.DataFrame({"batch_size": [config["batch_size"]],
@@ -194,6 +197,10 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         experiment_id=config["data_id"],
     )
 
+    # Data classifier contains random inputs, we select only the realistic ones (label=1)
+    train_data.inputs = train_data.inputs[(train_data.labels == 1).squeeze(-1)]
+    val_data.inputs = val_data.inputs[(val_data.labels == 1).squeeze(-1)]
+
     signatures = sort_signatures(
         file=data_folder + "data.xlsx",
         mutation_type_order=data_folder + "mutation_type_order.xlsx")
@@ -209,7 +216,7 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         model_path=os.path.join(config["models_dir"], config["model_id"]),
     )
 
-    train_DQ99R = trainer.objective(
+    train_DQ99R, train_loss, val_loss = trainer.objective(
         batch_size=config["batch_size"],
         lr_encoder=config["lr_encoder"],
         lr_decoder=config["lr_decoder"],
@@ -222,7 +229,7 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
 
     if config["enable_logging"]:
         run.finish()
-    return train_DQ99R
+    return train_DQ99R, train_loss, val_loss
 
 
 if __name__ == "__main__":
@@ -231,5 +238,5 @@ if __name__ == "__main__":
 
     config = read_config(path=os.path.join(TRAINING_CONFIGS, "vae_classifier/vc_config.yaml"))
     
-    DQ99R = train_vae_classifier(config=config,)
-    print("DQ99R:", DQ99R)
+    train_DQ99R, train_loss, val_loss = train_vae_classifier(config=config,)
+    print("DQ99R:", train_DQ99R)
