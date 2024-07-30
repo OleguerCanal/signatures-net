@@ -1,7 +1,7 @@
 config:
     # IDs & paths
     data_id: "datasets/detector"
-    model_id: "classifier_2"
+    model_id: "classifier_lr10"
     models_dir: "vae_classifier/"
 
     # Training params
@@ -9,8 +9,8 @@ config:
     num_classes: 96
     lagrange_param: 0.001
     batch_size: 100
-    lr_encoder: 0.005
-    lr_decoder: 0.0005
+    lr_encoder: 0.05
+    lr_decoder: 0.005
 
     # WANDB params
     enable_logging: True
