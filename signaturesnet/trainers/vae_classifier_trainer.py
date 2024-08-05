@@ -14,11 +14,8 @@ from tqdm import tqdm
 import wandb
 
 from signaturesnet import DATA, TRAINED_MODELS
-from signaturesnet.utilities.metrics import get_jensen_shannon, get_kl_divergence
 from signaturesnet.utilities.io import save_model
-from signaturesnet.utilities.generator_data import GeneratorData
-from signaturesnet.utilities.oversampler import OverSampler, CancerTypeOverSampler
-from signaturesnet.models import Generator
+from signaturesnet.models.vae_classifier import VaeClassifier
 from signaturesnet.loggers.generator_logger import GeneratorLogger
 
 class VaeClassifierTrainer:
@@ -29,8 +26,9 @@ class VaeClassifierTrainer:
             val_data,
             signatures,
             lagrange_param=1.0,
+            sigmoid_params = [5000, 2000],
             loging_path="../runs",
-            num_classes=94,
+            num_classes=96,
             log_freq=100,
             model_path=None,  # File where to save model learned weights None to not save
             device=torch.device("cuda:0"),
@@ -40,6 +38,7 @@ class VaeClassifierTrainer:
         self.device = device
         self.log_freq = log_freq
         self.lagrange_param = lagrange_param
+        self.sigmoid_params = sigmoid_params
         self.model_path = os.path.join(TRAINED_MODELS, model_path)
         self.train_dataset = train_data
         self.val_dataset = val_data
@@ -63,6 +62,8 @@ class VaeClassifierTrainer:
                   lr_decoder,
                   num_hidden_layers,
                   latent_dim,
+                  num_units=200,
+                  num_units_branch_mut=10,
                   plot=False):
 
         print(batch_size, lr_encoder, lr_decoder,
@@ -73,10 +74,13 @@ class VaeClassifierTrainer:
             batch_size=int(batch_size),
             shuffle=True,
         )
-        model = Generator(
+        model = VaeClassifier(
             input_size=int(self.num_classes),
             num_hidden_layers=int(num_hidden_layers),
             latent_dim=int(latent_dim),
+            num_units=num_units,
+            num_units_branch_mut=num_units_branch_mut,
+            sigmoid_params=self.sigmoid_params,
             device=self.device.type
         )
         model.to(self.device)
@@ -98,18 +102,18 @@ class VaeClassifierTrainer:
         self.batch_size_factor = 1.
         train_DQ99R = None
         for iteration in range(self.iterations):
-            for train_input, train_labels, _, _, _ in tqdm(dataloader):
+            for train_input, train_labels, _, train_nummut, _ in tqdm(dataloader):
                 # train_input = train_input[(train_labels == 1).squeeze(-1)]
                 model.train()
                 optimizer.zero_grad()
-                train_pred, train_mean, train_std = model(train_input)
-                # self.adapted_lagrange_param = self.lagrange_param
-                if step < total_steps*0.8:
-                    self.adapted_lagrange_param = self.lagrange_param * \
-                        float(total_steps - step)/float(total_steps)
-                else:
-                    self.adapted_lagrange_param = self.lagrange_param * \
-                        float(total_steps - total_steps*0.8)/float(total_steps)
+                train_pred, train_mean, train_std = model(train_input, train_nummut)
+                self.adapted_lagrange_param = self.lagrange_param
+                # if step < total_steps*0.8:
+                #     self.adapted_lagrange_param = self.lagrange_param * \
+                #         float(total_steps - step)/float(total_steps)
+                # else:
+                #     self.adapted_lagrange_param = self.lagrange_param * \
+                #         float(total_steps - total_steps*0.8)/float(total_steps)
                 train_loss = self.__loss(
                     input=train_input,
                     pred=train_pred,
@@ -125,7 +129,7 @@ class VaeClassifierTrainer:
                     # val_inputs = self.val_dataset.inputs[(self.val_dataset.labels == 1).squeeze(-1)]
                     val_inputs = self.val_dataset.inputs
                     val_pred, val_mean, val_std = model(
-                        val_inputs)
+                        val_inputs, self.val_dataset.num_mut)
                     val_loss = self.__loss(input=val_inputs,
                                            pred=val_pred,
                                            z_mu=val_mean,
@@ -173,7 +177,7 @@ def log_results(config, train_DQ99R, out_csv_path):
                          header=False, index=False, mode="a")
 
 def train_vae_classifier(config, data_folder=DATA + "/") -> float:
-    """Train a classification model and get the validation score
+    """Train a vae classifier
 
     Args:
         config (dict): Including all the needed args
@@ -188,9 +192,9 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
 
     if config["enable_logging"]:
         run = wandb.init(project=config["wandb_project_id"],
-                   entity='sig-net',
-                   config=config,
-                   name=config["model_id"])
+                    entity='sig-net',
+                    config=config,
+                    name=config["model_id"])
 
     train_data, val_data = read_data_classifier(
         device=dev,
@@ -199,8 +203,11 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
 
     # Data classifier contains random inputs, we select only the realistic ones (label=1)
     train_data.inputs = train_data.inputs[(train_data.labels == 1).squeeze(-1)]
+    train_data.num_mut = train_data.num_mut[(train_data.labels == 1).squeeze(-1)]
     val_data.inputs = val_data.inputs[(val_data.labels == 1).squeeze(-1)]
+    val_data.num_mut = val_data.num_mut[(val_data.labels == 1).squeeze(-1)]
 
+    # The signatures are not used, so could be deleted 
     signatures = sort_signatures(
         file=data_folder + "data.xlsx",
         mutation_type_order=data_folder + "mutation_type_order.xlsx")
@@ -212,6 +219,7 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         signatures=signatures,
         lagrange_param=config["lagrange_param"],
         num_classes=config["num_classes"],
+        sigmoid_params=config["sigmoid_params"],
         device=torch.device(dev),
         model_path=os.path.join(config["models_dir"], config["model_id"]),
     )
@@ -222,6 +230,8 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         lr_decoder=config["lr_decoder"],
         num_hidden_layers=config["num_hidden_layers"],
         latent_dim=config["latent_dim"],
+        num_units=200,
+        num_units_branch_mut=10,
         plot=config["enable_logging"],
     )
 
@@ -237,6 +247,6 @@ if __name__ == "__main__":
     from signaturesnet.utilities.io import read_config
 
     config = read_config(path=os.path.join(TRAINING_CONFIGS, "vae_classifier/vc_config.yaml"))
-    
+
     train_DQ99R, train_loss, val_loss = train_vae_classifier(config=config,)
     print("DQ99R:", train_DQ99R)
