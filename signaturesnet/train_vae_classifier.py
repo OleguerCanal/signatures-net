@@ -74,8 +74,8 @@ if __name__ == "__main__":
                                 #   "adapted_lagrange_param": [""],
                                 #   "batch_size_factor": [""],
                                   "train_DQ99R": [train_DQ99R],
-                                  "train_loss": [train_loss],
-                                  "val_loss": [val_loss]})
+                                  "train_loss": [train_loss.detach().numpy()],
+                                  "val_loss": [val_loss.detach().numpy()]})
                                 #   "val_mse": [val_mse],
                                 #   "val_KL": [val_KL],
                                 #   "val_loss": [""]})
