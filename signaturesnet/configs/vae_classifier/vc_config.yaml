@@ -1,25 +1,25 @@
 config:
     # IDs & paths
     data_id: "datasets/detector"
-    model_id: "classifier_nummut_sigmoid"
+    model_id: "ae_nummut_sigmoid"
     models_dir: "vae_classifier/"
 
     # Training params
-    iterations: 100
+    iterations: 2000
     num_classes: 96
     lagrange_param: 0.01
     batch_size: 500
-    lr_encoder: 0.0005
-    lr_decoder: 0.00005
+    lr_encoder: 0.008
+    lr_decoder: 0.0008
     sigmoid_params: [5000,1000]
 
     # WANDB params
     enable_logging: True
-    wandb_project_id: "vae_generator"
+    wandb_project_id: "vae_classification"
 
     # Network params
     num_hidden_layers: 5
-    latent_dim: 10
+    latent_dim: 20
 
     # Misc
     device: "cuda"
