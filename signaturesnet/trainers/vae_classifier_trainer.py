@@ -105,7 +105,9 @@ class VaeClassifierTrainer:
         train_DQ99R = None
         for iteration in range(self.iterations):
             for train_input, train_labels, _, train_nummut, _ in tqdm(dataloader):
-                # train_input = train_input[(train_labels == 1).squeeze(-1)]
+                train_input = train_input[(train_labels == 1).squeeze(-1)]
+                train_nummut = train_nummut[(train_labels == 1).squeeze(-1)]
+
                 optimizer.zero_grad()
                 train_pred, train_mean, train_std = model(train_input, train_nummut, noise=False)
                 self.adapted_lagrange_param = self.lagrange_param
@@ -131,11 +133,13 @@ class VaeClassifierTrainer:
                 if plot and step % self.log_freq == 0:
                     model.eval()
                     with torch.no_grad():
-                        # val_inputs = self.val_dataset.inputs[(self.val_dataset.labels == 1).squeeze(-1)]
-                        val_inputs = self.val_dataset.inputs
+                        val_inputs = self.val_dataset.inputs[(self.val_dataset.labels == 1).squeeze(-1)]
+                        val_nummut = self.val_dataset.num_mut[(self.val_dataset.labels == 1).squeeze(-1)]
+                        # val_inputs = self.val_dataset.inputs
+                        # val_nummut = self.val_dataset.num_mut
                         val_pred, val_mean, val_std = model(
                             val_inputs,
-                            self.val_dataset.num_mut,
+                            val_nummut,
                             noise=False
                         )
                         val_loss = self.__loss(
@@ -212,10 +216,10 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
     )
 
     # Data classifier contains random inputs, we select only the realistic ones (label=1)
-    train_data.inputs = train_data.inputs[(train_data.labels == 1).squeeze(-1)]
-    train_data.num_mut = train_data.num_mut[(train_data.labels == 1).squeeze(-1)]
-    val_data.inputs = val_data.inputs[(val_data.labels == 1).squeeze(-1)]
-    val_data.num_mut = val_data.num_mut[(val_data.labels == 1).squeeze(-1)]
+    # train_data.inputs = train_data.inputs[(train_data.labels == 1).squeeze(-1)]
+    # train_data.num_mut = train_data.num_mut[(train_data.labels == 1).squeeze(-1)]
+    # val_data.inputs = val_data.inputs[(val_data.labels == 1).squeeze(-1)]
+    # val_data.num_mut = val_data.num_mut[(val_data.labels == 1).squeeze(-1)]
 
     # The signatures are not used, so could be deleted 
     signatures = sort_signatures(
