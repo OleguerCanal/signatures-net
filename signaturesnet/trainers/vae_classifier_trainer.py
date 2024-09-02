@@ -39,7 +39,10 @@ class VaeClassifierTrainer:
         self.log_freq = log_freq
         self.lagrange_param = lagrange_param
         self.sigmoid_params = sigmoid_params
-        self.model_path = os.path.join(TRAINED_MODELS, model_path)
+        if model_path is not None:
+            self.model_path = os.path.join(TRAINED_MODELS, model_path)
+        else:
+            self.model_path = None
         self.train_dataset = train_data
         self.val_dataset = val_data
 
@@ -65,7 +68,8 @@ class VaeClassifierTrainer:
                   latent_dim,
                   num_units=200,
                   num_units_branch_mut=10,
-                  plot=False):
+                  plot=False,
+                  run=None):
 
         print(batch_size, lr_encoder, lr_decoder,
               num_hidden_layers, latent_dim)
@@ -93,10 +97,9 @@ class VaeClassifierTrainer:
             {'params': model.encoder_layers.parameters(), 'lr': lr_encoder},
             {'params': model.decoder_layers.parameters(), 'lr': lr_decoder}
         ])
-        model.train()
 
-        # l_vals = collections.deque(maxlen=50)
-        # max_found = -np.inf
+        l_vals = collections.deque(maxlen=50)
+        max_found = -np.inf
         step = 0
         # total_steps = 1000*len(self.train_dataset)
         total_steps = self.iterations*len(self.train_dataset)
@@ -108,6 +111,7 @@ class VaeClassifierTrainer:
                 train_input = train_input[(train_labels == 1).squeeze(-1)]
                 train_nummut = train_nummut[(train_labels == 1).squeeze(-1)]
 
+                model.train()
                 optimizer.zero_grad()
                 train_pred, train_mean, train_std = model(train_input, train_nummut, noise=False)
                 self.adapted_lagrange_param = self.lagrange_param
@@ -127,12 +131,8 @@ class VaeClassifierTrainer:
                 train_loss.backward()
                 optimizer.step()
 
-                    # l_vals.append(val_loss.item())
-                    # max_found = max(max_found, -np.nanmean(l_vals))
-
-                if plot and step % self.log_freq == 0:
-                    model.eval()
-                    with torch.no_grad():
+                model.eval()
+                with torch.no_grad():
                         val_inputs = self.val_dataset.inputs[(self.val_dataset.labels == 1).squeeze(-1)]
                         val_nummut = self.val_dataset.num_mut[(self.val_dataset.labels == 1).squeeze(-1)]
                         # val_inputs = self.val_dataset.inputs
@@ -148,8 +148,10 @@ class VaeClassifierTrainer:
                             z_mu=val_mean,
                             z_std=val_std
                         )
-    
-                    print('Logger...')
+                        l_vals.append(val_loss.item())
+                        max_found = max(max_found, -np.nanmean(l_vals))
+
+                if run and step % self.log_freq == 0:
                     current_train_DQ99R = self.logger.log(
                         train_loss=train_loss,
                         train_prediction=train_pred,
@@ -166,9 +168,6 @@ class VaeClassifierTrainer:
                     )
                     train_DQ99R = current_train_DQ99R if current_train_DQ99R is not None else train_DQ99R
                     
-                    model.train()
-                    
-
                 if self.model_path is not None and step % 1000 == 0:
                     print('Saving model...')
                     save_model(model=model, directory=self.model_path)
@@ -176,8 +175,9 @@ class VaeClassifierTrainer:
         if self.model_path is not None:
             save_model(model=model, directory=self.model_path)
         
-        # Return last mse and KL obtained in validation
-        return train_DQ99R, train_loss, val_loss
+        # if run is not None:
+        #     run.finish()
+        return max_found
 
 def log_results(config, train_DQ99R, out_csv_path):
     model_results = pd.DataFrame({"batch_size": [config["batch_size"]],
@@ -204,6 +204,7 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
     ) else "cpu"
     print("Using device:", dev)
 
+    run = None
     if config["enable_logging"]:
         run = wandb.init(project=config["wandb_project_id"],
                     entity='sig-net',
@@ -238,22 +239,23 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         model_path=os.path.join(config["models_dir"], config["model_id"]),
     )
 
-    train_DQ99R, train_loss, val_loss = trainer.objective(
+    min_val = trainer.objective(
         batch_size=config["batch_size"],
         lr_encoder=config["lr_encoder"],
         lr_decoder=config["lr_decoder"],
         num_hidden_layers=config["num_hidden_layers"],
         latent_dim=config["latent_dim"],
-        num_units=200,
-        num_units_branch_mut=10,
+        num_units=config["num_units"],
+        num_units_branch_mut=config["num_units_branch_mut"],
         plot=config["enable_logging"],
-    )
+        run=run)
 
-    wandb.log({"train_DQ99R_score": train_DQ99R})
+    # wandb.log({"train_DQ99R_score": train_DQ99R})
 
     if config["enable_logging"]:
+        wandb.log({"validation_score": min_val})
         run.finish()
-    return train_DQ99R, train_loss, val_loss
+    return min_val
 
 
 if __name__ == "__main__":
