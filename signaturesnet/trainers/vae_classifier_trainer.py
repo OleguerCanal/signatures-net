@@ -245,7 +245,7 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         num_hidden_layers=config["num_hidden_layers"],
         latent_dim=config["latent_dim"],
         num_units=200,
-        num_units_branch_mut=10,
+        num_units_branch_mut=1,
         plot=config["enable_logging"],
     )
 
@@ -259,8 +259,13 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
 if __name__ == "__main__":
     from signaturesnet import TRAINING_CONFIGS
     from signaturesnet.utilities.io import read_config
-
+    
     config = read_config(path=os.path.join(TRAINING_CONFIGS, "vae_classifier/vc_config.yaml"))
+    
 
-    train_DQ99R, train_loss, val_loss = train_vae_classifier(config=config,)
-    print("DQ99R:", train_DQ99R)
+    for i in range(1, 20):
+        torch.manual_seed(i)
+        config["model_id"] = config["model_id"] + "_%d" % i
+
+        train_DQ99R, train_loss, val_loss = train_vae_classifier(config=config,)
+        print("DQ99R:", train_DQ99R)
