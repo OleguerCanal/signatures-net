@@ -63,21 +63,23 @@ if __name__ == "__main__":
     config = read_config(path=getattr(_args, "config_file")[0])
     config = update_dict(config=config, args=_args)
     print("Using config:", config)
-    train_DQ99R, train_loss, val_loss = train_vae_classifier(config=config)
+    min_val = train_vae_classifier(config=config)
 
-    model_results = pd.DataFrame({"batch_size": [config["batch_size"]],
-                                  "lr_encoder": [config["lr_encoder"]],
-                                  "lr_decoder": [config["lr_decoder"]],
-                                  "num_hidden_layers": [config["num_hidden_layers"]],
-                                  "latent_dim": [config["latent_dim"]],
-                                  "lagrange_param": [config["lagrange_param"]],
-                                #   "adapted_lagrange_param": [""],
-                                #   "batch_size_factor": [""],
-                                  "train_DQ99R": [train_DQ99R],
-                                  "train_loss": [train_loss.detach().numpy()],
-                                  "val_loss": [val_loss.detach().numpy()]})
-                                #   "val_mse": [val_mse],
-                                #   "val_KL": [val_KL],
-                                #   "val_loss": [""]})
-    model_results.to_csv("../tmp/vae_classifier_models.csv",
-                         header=False, index=False, mode="a")
+    print("min_val obtained is:")
+    print(min_val)
+    # model_results = pd.DataFrame({"batch_size": [config["batch_size"]],
+    #                               "lr_encoder": [config["lr_encoder"]],
+    #                               "lr_decoder": [config["lr_decoder"]],
+    #                               "num_hidden_layers": [config["num_hidden_layers"]],
+    #                               "latent_dim": [config["latent_dim"]],
+    #                               "lagrange_param": [config["lagrange_param"]],
+    #                             #   "adapted_lagrange_param": [""],
+    #                             #   "batch_size_factor": [""],
+    #                               "train_DQ99R": [train_DQ99R],
+    #                               "train_loss": [train_loss.detach().numpy()],
+    #                               "val_loss": [val_loss.detach().numpy()]})
+    #                             #   "val_mse": [val_mse],
+    #                             #   "val_KL": [val_KL],
+    #                             #   "val_loss": [""]})
+    # model_results.to_csv("../tmp/vae_classifier_models.csv",
+    #                      header=False, index=False, mode="a")
