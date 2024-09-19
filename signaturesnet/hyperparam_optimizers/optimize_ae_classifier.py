@@ -9,8 +9,8 @@ from signaturesnet.utilities.io import read_data_classifier, sort_signatures
 from signaturesnet.trainers import VaeClassifierTrainer
 from signaturesnet.HyperParameterOptimizer.gaussian_process import GaussianProcessSearch
 
-experiment_id = "aeclassifier"
-iterations = 15
+experiment_id = "aeclassifierAUC"
+iterations = 20
 
 batch_sizes = Integer(name='batch_size', low=10, high=5000)
 learning_rates_encoder = Real(name='lr_encoder', low=0.00001, high=0.001)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
                          config=config,
                          name=str(config))
 
-        val = trainer.objective(batch_size=batch_size,
+        roc_auc = trainer.objective(batch_size=batch_size,
                                 lr_encoder=lr_encoder,
                                 lr_decoder=lr_decoder,
                                 num_hidden_layers=num_hidden_layers,
@@ -84,11 +84,10 @@ if __name__ == "__main__":
                                 num_units_branch_mut=num_units_branch_mut,
                                 plot=plot,
                                 run=run)
-        print(val)
         
-        wandb.log({"validation_score": val})
+        wandb.log({"AUC": roc_auc})
         run.finish()
-        return val
+        return roc_auc
 
     # Start optimization
     gp_search = GaussianProcessSearch(search_space=search_space,

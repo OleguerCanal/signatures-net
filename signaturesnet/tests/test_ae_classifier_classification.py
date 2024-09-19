@@ -5,30 +5,20 @@ IS THE RECONSTRUCTION OF RANDOM MUTATIONS WORSE THAN A REALISTIC EXAMPLE?
 The answer is:
 """
 
-import collections
 import os
-import sys
 
-import numpy as np
-import pandas as pd
-from pandas.core.algorithms import mode
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-import wandb
 import matplotlib.pyplot as plt
 
 
 from signaturesnet import DATA, TRAINED_MODELS
-from signaturesnet.utilities.io import save_model
 from signaturesnet.models.vae_classifier import VaeClassifier
 from signaturesnet.loggers.generator_logger import GeneratorLogger
-from signaturesnet.utilities.plotting import plot_matrix
 from signaturesnet.utilities.io import read_model
 from signaturesnet.utilities.io import read_data_classifier
-from signaturesnet.utilities.io import sort_signatures
 from sklearn.metrics import roc_curve, auc
 
 def get_dist_vec(reals, reconstructions):
@@ -48,14 +38,16 @@ def plot_hist(fake_d_np, real_d_np):
     plt.xlabel('Distance')
     plt.ylabel('Frequency')
     plt.legend()
-
-    plt.show()
+    plt.savefig('test_ae_classifier/distances_model1_AUC.png')
+    plt.close()
     
 def plot_roc(binary_labels, probabilities):
     # Compute ROC curve and ROC area
     fpr, tpr, thresholds = roc_curve(binary_labels, probabilities)
+    # print(fpr)
+    # print(tpr)
+    # print(thresholds)
     roc_auc = auc(fpr, tpr)
-
     # Plot ROC curve
     plt.figure(figsize=(10, 6))
     plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
@@ -66,11 +58,13 @@ def plot_roc(binary_labels, probabilities):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic (ROC) Curve')
     plt.legend(loc='lower right')
-    plt.show()
+    # plt.show()
+    plt.savefig('test_ae_classifier/ROC_model1_AUC.png')
+    plt.close()
 
 if __name__ == "__main__":
-    dev = "cuda"
-    model_dir = os.path.join(TRAINED_MODELS, "vae_classifier/ae_nummut_sigmoid_2")
+    dev = "cpu"
+    model_dir = os.path.join(TRAINED_MODELS, "vae_classifier/ae_best_1_AUC")
     model = read_model(model_dir, device=dev).eval()
 
     train_data, val_data = read_data_classifier(

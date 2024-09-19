@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     if real_data_test:
         data_dir = os.path.join(DATA, "datasets", "vae_classification_test")
-        model_dir = os.path.join(TRAINED_MODELS, "vae_classifier/classifier_nummut_sigmoid")
+        model_dir = os.path.join(TRAINED_MODELS, "vae_classifier/ae_old_param")
 
         data = parse_data(data_dir)
 
@@ -95,24 +95,25 @@ if __name__ == "__main__":
         import matplotlib.pyplot as plt
         x = [e for e in downstream]
         y = torch.tensor([metrics[f"downstream_{e}"]["rec_dist"] for e in downstream])
-        z = torch.tensor([metrics[f"downstream_{e}"]["z_mu"] for e in downstream])
+        # z = torch.tensor([metrics[f"downstream_{e}"]["z_mu"] for e in downstream])
 
         #normalize
-        y = (y - y.mean()) / y.std()
-        z = (z - z.mean()) / z.std()
+        # y = (y - y.mean()) / y.std()
+        # z = (z - z.mean()) / z.std()
 
         # same for upstream, yes I'm being very lazy here
         xx = [e for e in upstream]
         yy = torch.tensor([metrics[f"upstream_{e}"]["rec_dist"] for e in upstream])
-        zz = torch.tensor([metrics[f"upstream_{e}"]["z_mu"] for e in upstream])
+        # zz = torch.tensor([metrics[f"upstream_{e}"]["z_mu"] for e in upstream])
         
-        yy = (yy - yy.mean()) / yy.std()
-        zz = (zz - zz.mean()) / zz.std()
+        # yy = (yy - yy.mean()) / yy.std()
+        # zz = (zz - zz.mean()) / zz.std()
 
-        plt.plot(x, 0.6*y + 0.4*z, label="Downstream Dissimilarity")
-        plt.plot(xx, 0.6*yy + 0.4*zz, label="Upstream Dissimilarity")
+        plt.plot(x, y, label="Downstream Dissimilarity")
+        plt.plot(xx, yy, label="Upstream Dissimilarity")
         plt.legend()
-        plt.show()
+        plt.savefig('test_ae_classifier/TSS_distances_ae_old_param.png')
+        plt.close()
 
     if synthetic_data_test:
         import pandas as pd
@@ -123,7 +124,7 @@ if __name__ == "__main__":
         test_num_mut = pd.read_csv(data_dir + "/test_num_mut.csv", header=None)
         test_label = pd.read_csv(data_dir + "/test_label.csv", header=None)
 
-        model_dir = os.path.join(TRAINED_MODELS, "vae_classifier/classifier_nummut_sigmoid")
+        model_dir = os.path.join(TRAINED_MODELS, "vae_classifier/ae_old_param")
         vae_classifier = read_model(model_dir, device="cpu").eval()
 
         with torch.no_grad():
@@ -140,7 +141,7 @@ if __name__ == "__main__":
                 "rec_dist_mean": reconstruction_dist_mean.item(),
                 "z_mu_mean": z_mu.abs().mean().item(),
                 "z_var_mean": z_var.abs().mean().item(),
-                "rec_dist": reconstruction_dist.sum(axis=1).sqrt().tolist(),
+                "rec_dist": (reconstruction_dist**2).sum(axis=1).sqrt().tolist(),
                 "z_mu": z_mu.abs().mean(axis=1).tolist(),
                 "z_var": z_var.abs().mean(axis=1).tolist(),
             }
@@ -153,7 +154,7 @@ if __name__ == "__main__":
                 "rec_dist_mean": reconstruction_dist_mean.item(),
                 "z_mu_mean": z_mu.abs().mean().item(),
                 "z_var_mean": z_var.abs().mean().item(),
-                "rec_dist": reconstruction_dist.sum(axis=1).sqrt().tolist(),
+                "rec_dist": (reconstruction_dist**2).sum(axis=1).sqrt().tolist(),
                 "z_mu": z_mu.abs().mean(axis=1).tolist(),
                 "z_var": z_var.abs().mean(axis=1).tolist(),
             }   
@@ -161,28 +162,30 @@ if __name__ == "__main__":
         # Plot metrics
         import matplotlib.pyplot as plt
         y = torch.tensor(metrics["realistic"]["rec_dist"])
-        z = torch.tensor(metrics["realistic"]["z_mu"])
+        # z = torch.tensor(metrics["realistic"]["z_mu"])
         x = [1 for _ in y]
         ymean = torch.tensor([metrics["realistic"]["rec_dist_mean"]])
-        zmean = torch.tensor([metrics["realistic"]["z_mu_mean"]])
+        # zmean = torch.tensor([metrics["realistic"]["z_mu_mean"]])
 
         #normalize
-        y = (y - y.mean()) / y.std()
-        z = (z - z.mean()) / z.std()
+        # y = (y - y.mean()) / y.std()
+        # z = (z - z.mean()) / z.std()
 
         # same for upstream, yes I'm being very lazy here
         yy = torch.tensor(metrics["random"]["rec_dist"])
-        zz = torch.tensor(metrics["random"]["z_mu"])
+        # zz = torch.tensor(metrics["random"]["z_mu"])
         xx = [0 for _ in yy]
         yymean = torch.tensor([metrics["random"]["rec_dist_mean"]])
-        zzmean = torch.tensor([metrics["random"]["z_mu_mean"]])
+        # zzmean = torch.tensor([metrics["random"]["z_mu_mean"]])
 
-        yy = (yy - yy.mean()) / yy.std()
-        zz = (zz - zz.mean()) / zz.std()
+        # yy = (yy - yy.mean()) / yy.std()
+        # zz = (zz - zz.mean()) / zz.std()
 
-        plt.scatter(x, 0.6*y + 0.4*z, label="Realistic Dissimilarity")
-        plt.scatter(xx, 0.6*yy + 0.4*zz, label="Random Dissimilarity")
-        plt.scatter([1], 0.6*ymean + 0.4*zmean, label="Realistic Average Dissimilarity")
-        plt.scatter([0], 0.6*yymean + 0.4*zzmean, label="Random Average Dissimilarity")
+        plt.scatter(x, y, label="Realistic Dissimilarity")
+        plt.scatter(xx, yy, label="Random Dissimilarity")
+        plt.scatter([1], ymean, label="Realistic Average Dissimilarity")
+        plt.scatter([0], yymean, label="Random Average Dissimilarity")
         plt.legend()
-        plt.show()
+        # plt.show()
+        plt.savefig('test_ae_classifier/test_distances_ae_old_param.png')
+        plt.close()

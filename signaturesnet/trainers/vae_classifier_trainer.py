@@ -12,9 +12,10 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import wandb
+from sklearn.metrics import roc_curve, auc
 
 from signaturesnet import DATA, TRAINED_MODELS
-from signaturesnet.utilities.io import save_model
+from signaturesnet.utilities.io import csv_to_tensor, save_model
 from signaturesnet.models.vae_classifier import VaeClassifier
 from signaturesnet.loggers.generator_logger import GeneratorLogger
 
@@ -175,9 +176,32 @@ class VaeClassifierTrainer:
         if self.model_path is not None:
             save_model(model=model, directory=self.model_path)
         
+        roc_auc, fpr, tpr, thresholds = compute_separation_metrics(model, self.device)
+
+        with open("../hyperparam_optimizers/classifierAUC_params.csv", "a") as f:
+            f.write(str(fpr) + '\t' + str(tpr) + '\t' + str(thresholds) + '\n')
+        f.close()
         # if run is not None:
         #     run.finish()
-        return max_found
+        return roc_auc
+
+def get_dist_vec(reals, reconstructions):
+    N = len(reals)
+    D = torch.zeros(N)
+    for i in range(N):
+        D[i] = nn.MSELoss()(reals[i], reconstructions[i])
+    return D
+
+def compute_separation_metrics(model, dev):
+    num_mut = csv_to_tensor("../data/datasets/detector/val_num_mut.csv", device=dev)
+    inputs = csv_to_tensor("../data/datasets/detector/val_input.csv", device=dev)
+    labels = csv_to_tensor("../data/datasets/detector/val_label.csv", device=dev).to(torch.int64)
+    pred, mean, std = model(inputs, num_mut, noise=False)
+    distances = torch.clip(get_dist_vec(inputs, pred).to(dev), 0, 0.001)
+    probs = 1 - (distances / 0.001)  # very improvable
+    fpr, tpr, thresholds = roc_curve(labels.cpu().detach().numpy(), probs.cpu().detach().numpy())
+    roc_auc = auc(fpr, tpr)
+    return roc_auc, fpr, tpr, thresholds
 
 def log_results(config, train_DQ99R, out_csv_path):
     model_results = pd.DataFrame({"batch_size": [config["batch_size"]],
@@ -239,7 +263,7 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
         model_path=os.path.join(config["models_dir"], config["model_id"]),
     )
 
-    min_val = trainer.objective(
+    roc_auc = trainer.objective(
         batch_size=config["batch_size"],
         lr_encoder=config["lr_encoder"],
         lr_decoder=config["lr_decoder"],
@@ -253,9 +277,9 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
     # wandb.log({"train_DQ99R_score": train_DQ99R})
 
     if config["enable_logging"]:
-        wandb.log({"validation_score": min_val})
+        wandb.log({"AUC": roc_auc})
         run.finish()
-    return min_val
+    return roc_auc
 
 
 if __name__ == "__main__":
@@ -264,5 +288,5 @@ if __name__ == "__main__":
 
     config = read_config(path=os.path.join(TRAINING_CONFIGS, "vae_classifier/vc_config.yaml"))
 
-    train_DQ99R, train_loss, val_loss = train_vae_classifier(config=config,)
-    print("DQ99R:", train_DQ99R)
+    roc_auc = train_vae_classifier(config=config,)
+    print("AUC:", roc_auc)

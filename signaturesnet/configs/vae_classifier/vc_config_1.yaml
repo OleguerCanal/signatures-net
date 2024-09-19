@@ -1,0 +1,27 @@
+config:
+    # IDs & paths
+    data_id: "datasets/detector"
+    model_id: "ae_best_1_AUC"
+    models_dir: "vae_classifier/"
+
+    # Training params
+    iterations: 2000
+    num_classes: 96
+    lagrange_param: 0.01
+    batch_size: 16
+    lr_encoder: 0.000220577
+    lr_decoder: 0.000012286
+    sigmoid_params: [5000,1000]
+
+    # WANDB params
+    enable_logging: True
+    wandb_project_id: "bayesian-aeclassifierAUC"
+
+    # Network params
+    num_hidden_layers: 3
+    latent_dim: 60
+    num_units: 151
+    num_units_branch_mut: 3
+
+    # Misc
+    device: "cuda"
