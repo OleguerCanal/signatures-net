@@ -285,8 +285,13 @@ def train_vae_classifier(config, data_folder=DATA + "/") -> float:
 if __name__ == "__main__":
     from signaturesnet import TRAINING_CONFIGS
     from signaturesnet.utilities.io import read_config
-
+    
     config = read_config(path=os.path.join(TRAINING_CONFIGS, "vae_classifier/vc_config.yaml"))
+    
+
+    for i in range(1, 20):
+        torch.manual_seed(i)
+        config["model_id"] = config["model_id"] + "_%d" % i
 
     roc_auc = train_vae_classifier(config=config,)
     print("AUC:", roc_auc)
