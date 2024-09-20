@@ -1,24 +1,42 @@
 from setuptools import setup, find_packages
 
-setup(name='signet',
-      version='0.0.0',
+# Read the content of your README file
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+setup(name='signaturesnet',
+      version='0.1.1',
       description="Package to manipulate mutational processes.",
-      url='https://github.com/OleguerCanal/signatures-net',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+      url='https://github.com/weghornlab/SigNet',
       packages=find_packages(),
       install_requires=[
-            'torch==1.11',
+            'torch',
             'scipy',
-            'numpy==1.23.3',
+            'numpy==1.19.5',
             'matplotlib==3.3.4',
             'pandas',
-            'seaborn==0.11.1',
-            'scikit_optimize==0.8.1',
-            'tqdm==4.59.0',
-            'pyparsing==2.4.7',
-            'gaussian_process==0.0.14',
-            'PyYAML==6.0',
-            'scikit_learn',
+            'seaborn',
+            'scikit-optimize==0.8.1',
+            'tqdm',
+            'pyparsing',
+            #'gaussian_process',
+            'PyYAML',
+            'scikit-learn==0.22.0',
             'openpyxl',
             'tensorboard',
             'wandb',
-      ])
+      ],
+      package_data={
+            'signaturesnet': [
+                  'data/data.xlsx',
+                  'data/mutation_type_order.xlsx',
+                  'data/real_data/*.txt'
+                  'data/real_data/*.csv'
+                  'trained_models/**/*.json',
+                  'trained_models/**/*.zip',
+                  'configs/**/*.yaml'
+            ],
+      },
+)

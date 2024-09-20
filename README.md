@@ -14,6 +14,9 @@ As of now, it contains 3 solutions:
 - **[SigNet Detector](documentation/signet_detector.md)**: Tool for mutational vector out-of-distribution detection.
 
 
+This is the official code implementation of the paper: [Mutational signature decomposition with deep neural networks reveals origins of clock-like processes and hypoxia dependencies](https://www.biorxiv.org/content/10.1101/2023.12.06.570467v1).
+By [Claudia Serrano](https://www.linkedin.com/in/claudia-serrano-colome-440aa9182/), [Oleguer Canal](https://github.com/OleguerCanal), et all.
+
 ## Readme contents
 
 You can use SigNet in 3 different ways depending on your workflow:
@@ -34,15 +37,14 @@ Recommended if you want to integrate SigNet as part of your python workflow, or 
 You can install the python package running:
 
 ```BASH
-pip install signet
+pip install signaturesnet
 ```
-**NOTE:** *The package hasn't yet been published to [pypi](https://pypi.org/). Please refer to [Source Code](#source-code)* to use it for now.*
 
 Once installed, you can run Signet Refitter like so:
 
 ```python
 import pandas as pd
-import signet
+from signaturesnet.modules.signet_module import SigNet
 
 # Read your mutational data
 mutations = pd.read_csv("your_input", header=0, index_col=0)
@@ -74,9 +76,9 @@ For a more usage examples: Check out the [examples folder](examples/):
 Recommended if only interested in running SigNet modules independently and **not** willing to retrain models or change the source code.<br>
 **NOTE**: _This option is only tested on Debian-based Linux distributions_. Steps:
 
-1. Download the [signet exectuable](TODOlink_to_executable)
+1. Download the [signaturesnet exectuable](TODOlink_to_executable)
 2. Change directory to wherever you downloaded it: `cd <wherever/you/downloaded/the/executable/>` 
-3. Make it executable by your user: `sudo chmod u+x signet`
+3. Make it executable by your user: `sudo chmod u+x signaturesnet`
 
 __Refitter:__
 
@@ -85,7 +87,7 @@ The following example shows how to use [SigNet Refitter](documentation/signet_re
 
 ```BASH
 cd <wherever/you/downloaded/the/executable/>
-./signet refitter  [--input_format {counts, bed, vcf}]
+./signaturesnet refitter  [--input_format {counts, bed, vcf}]
                    [--input_data INPUTFILE]
                    [--reference_genome REFGENOME]
                    [--normalization {None, exome, genome, PATH_TO_ABUNDANCES}] 
@@ -120,7 +122,7 @@ __Detector:__
 
 ```BASH
 cd <wherever/you/downloaded/the/executable/>
-./signet detector  [--input_data INPUTFILE]
+./signaturesnet detector  [--input_data INPUTFILE]
                    [--normalization {None, exome, genome, PATH_TO_ABUNDANCES}] 
                    [--output OUTPUT]
 ```
@@ -131,7 +133,7 @@ __Generator:__
 
 ```BASH
 cd <wherever/you/downloaded/the/executable/>
-./signet generator  [--n_datapoints INT]
+./signaturesnet generator  [--n_datapoints INT]
                     [--output OUTPUT]
 ```
 
@@ -148,7 +150,7 @@ Recommended if you want to play around with the code, re-train custom models or 
 Clone the repo and install it as an editable pip package like so:
 
 ```BASH
-git clone git@github.com:OleguerCanal/SigNet.git
+git clone git@github.com:weghornlab/SigNet.git
 cd SigNet
 pip install -e .
 ```

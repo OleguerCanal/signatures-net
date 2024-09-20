@@ -4,8 +4,8 @@ import logging
 from argparse import ArgumentParser
 import pandas as pd
 
-from signet import DATA
-from signet.modules.signet_module import SigNet
+from signaturesnet import DATA
+from signaturesnet.modules.signet_module import SigNet
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO,

@@ -4,9 +4,9 @@ import logging
 from argparse import ArgumentParser
 import pandas as pd
 
-from signet import DATA
-from signet.modules.signet_module import SigNet
-from signet.utilities.VCF_to_counts import VCF_to_counts, bed_to_counts
+from signaturesnet import DATA
+from signaturesnet.modules.signet_module import SigNet
+from signaturesnet.utilities.VCF_to_counts import VCF_to_counts, bed_to_counts
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO,

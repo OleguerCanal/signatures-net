@@ -6,12 +6,12 @@ from argparse import ArgumentParser
 import pandas as pd
 import torch
 
-from signet import DATA, TRAINED_MODELS
-from signet.modules.signet_module import SigNet
-from signet.models import Generator
-from signet.models import Classifier
-from signet.utilities.io import read_model, tensor_to_csv
-from signet.utilities.normalize_data import normalize_data
+from signaturesnet import DATA, TRAINED_MODELS
+from signaturesnet.modules.signet_module import SigNet
+from signaturesnet.models import Generator
+from signaturesnet.models import Classifier
+from signaturesnet.utilities.io import read_model, tensor_to_csv
+from signaturesnet.utilities.normalize_data import normalize_data
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
                     level=logging.INFO,
